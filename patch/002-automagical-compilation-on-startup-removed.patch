@@ -1,0 +1,12 @@
+diff --git a/xmonad-0.11/Main.hs b/xmonad-0.11/Main.hs
+index d93ff7c..cd71a9a 100644
+--- a/xmonad-0.11/Main.hs
++++ b/xmonad-0.11/Main.hs
+@@ -91,7 +91,6 @@ usage = do
+ --
+ buildLaunch ::  IO ()
+ buildLaunch = do
+-    recompile False
+     dir  <- getXMonadDir
+     args <- getArgs
+     executeFile (dir ++ "/xmonad-"++arch++"-"++os) False args Nothing

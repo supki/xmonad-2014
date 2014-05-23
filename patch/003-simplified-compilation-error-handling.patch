@@ -1,0 +1,21 @@
+diff --git a/xmonad-0.11/XMonad/Core.hs b/xmonad-0.11/XMonad/Core.hs
+index 1e079fb..bbf84e4 100644
+--- a/xmonad-0.11/XMonad/Core.hs
++++ b/xmonad-0.11/XMonad/Core.hs
+@@ -468,15 +468,10 @@ recompile force args = io $ do
+ 
+         -- now, if it fails, run xmessage to let the user know:
+         when (status /= ExitSuccess) $ do
+-            ghcErr <- readFile err
+-            let msg = unlines $
+-                    ["Error detected while loading xmonad configuration file: " ++ src]
+-                    ++ lines (if null ghcErr then show status else ghcErr)
+-                    ++ ["","Please check the file for errors."]
++            msg <- readFile err
+             -- nb, the ordering of printing, then forking, is crucial due to
+             -- lazy evaluation
+             hPutStrLn stderr msg
+-            forkProcess $ executeFile "xmessage" True ["-default", "okay", msg] Nothing
+             return ()
+         return (status == ExitSuccess)
+       else return True

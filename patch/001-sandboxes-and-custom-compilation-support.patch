@@ -1,0 +1,37 @@
+diff --git a/xmonad-0.11.orig/Main.hs b/xmonad-0.11/Main.hs
+index cd076b5..d93ff7c 100644
+--- a/xmonad-0.11.orig/Main.hs
++++ b/xmonad-0.11/Main.hs
+@@ -42,7 +42,7 @@ main = do
+         []                    -> launch
+         ("--resume":_)        -> launch
+         ["--help"]            -> usage
+-        ["--recompile"]       -> recompile True >>= flip unless exitFailure
++        ("--recompile" : args) -> recompile True args >>= flip unless exitFailure
+         ["--replace"]         -> launch
+         ["--restart"]         -> sendRestart >> return ()
+         ["--version"]         -> putStrLn $ unwords shortVersion
+diff --git a/xmonad-0.11/XMonad/Core.hs b/xmonad-0.11/XMonad/Core.hs
+index 414437b..1e079fb 100644
+--- a/xmonad-0.11/XMonad/Core.hs
++++ b/xmonad-0.11/XMonad/Core.hs
+@@ -443,8 +443,8 @@ getXMonadDir = io $ getAppUserDataDirectory "xmonad"
+ --
+ -- 'False' is returned if there are compilation errors.
+ --
+-recompile :: MonadIO m => Bool -> m Bool
+-recompile force = io $ do
++recompile :: MonadIO m => Bool -> [String] -> m Bool
++recompile force args = io $ do
+     dir <- getXMonadDir
+     let binn = "xmonad-"++arch++"-"++os
+         bin  = dir </> binn
+@@ -460,7 +460,7 @@ recompile force = io $ do
+         -- temporarily disable SIGCHLD ignoring:
+         uninstallSignalHandlers
+         status <- bracket (openFile err WriteMode) hClose $ \h ->
+-            waitForProcess =<< runProcess "ghc" ["--make", "xmonad.hs", "-i", "-ilib", "-fforce-recomp", "-v0", "-o",binn] (Just dir)
++            waitForProcess =<< runProcess "cabal" (["exec", "ghc", "--", "--make", "xmonad.hs", "-i", "-ilib", "-fforce-recomp", "-v0", "-o",binn] ++ args) (Just dir)
+                                     Nothing Nothing Nothing (Just h)
+ 
+         -- re-enable SIGCHLD:
