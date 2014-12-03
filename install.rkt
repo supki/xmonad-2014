@@ -19,24 +19,26 @@
 (define (xmonad-2014/main)
   (with-temporary-directory
     (λ (temp-dir)
-      (let*
-        [(xmonad (package "xmonad" (xmonad-version)))
-         (cabal (find-executable-path "cabal"))
-         (patch (find-executable-path "patch"))
-         (xmonad-path (build-path temp-dir (string-append xmonad "/")))
-         (sandbox (cabal-sandbox))]
-        (system*/exit-code/error-out cabal "get" "--destdir" temp-dir xmonad)
-        (for-each
-          (λ (file) (system*/exit-code/error-out patch "-p1" "--directory" temp-dir "--input" file))
-          (directory-list (build-path (current-directory) "patch") #:build? #t))
-        (apply
-          system*/exit-code/error-out
-          cabal
-          (flatten
-            (list
-              (if sandbox (list "--sandbox-config-file" sandbox) '())
-              "install"
-              xmonad-path)))))))
+       (let*
+         [(xmonad (package "xmonad" (xmonad-version)))
+          (cabal (find-executable-path "cabal"))
+          (patch (find-executable-path "patch"))
+          (xmonad-path (build-path temp-dir (string-append xmonad "/")))
+          (sandbox (cabal-sandbox))]
+         (system*/exit-code/error-out cabal "get" "--destdir" temp-dir xmonad)
+         (for-each
+           (λ (file)
+              (system*/exit-code/error-out patch "-p1" "--directory" temp-dir "--input" file))
+           (directory-list (build-path (current-directory) "patch") #:build? #t))
+         (apply
+           system*/exit-code/error-out
+           cabal
+           (flatten
+             (list
+               "--require-sandbox"
+               (if sandbox (list "--sandbox-config-file" sandbox) '())
+               "install"
+               xmonad-path)))))))
 
 (define (package name version)
   (string-append name "-" version))
@@ -45,13 +47,13 @@
   (let ([dir #f])
     (dynamic-wind
       (λ ()
-        (set! dir (make-temporary-file))
-        (delete-file dir)
-        (make-directory dir))
+         (set! dir (make-temporary-file))
+         (delete-file dir)
+         (make-directory dir))
       (λ ()
-        (f dir))
+         (f dir))
       (λ ()
-        (delete-directory/files dir)))))
+         (delete-directory/files dir)))))
 
 (define (system*/exit-code/error-out command . args)
   (let ([exit-code (apply system*/exit-code command args)])
